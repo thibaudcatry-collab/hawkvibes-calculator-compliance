@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawkvibes Score Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif;
+            /* Important for embedding: remove fixed height/margins */
+            min-height: auto; 
+            padding: 20px;
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4F46E5;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col items-center">
+
+    <div class="w-full max-w-4xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Hawkvibes Score Calculator</h1>
+            <p class="text-slate-500">AML Operations Performance Matrix</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Input Section -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+                <h2 class="text-xl font-semibold mb-6 flex items-center">
+                    <i class="fa-solid fa-sliders text-indigo-600 mr-2"></i> Performance Inputs
+                </h2>
+
+                <!-- QA Score Input -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Quarterly QA Score (%)</label>
+                    <div class="flex items-center space-x-4">
+                        <input type="range" id="qaInput" min="0" max="100" value="90" step="0.1" 
+                            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                        <div class="w-20">
+                            <input type="number" id="qaNumber" value="90" min="0" max="100" step="0.1"
+                                class="w-full p-2 text-center border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none font-bold text-indigo-700">
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                        <span>Critical (<80%)</span>
+                        <span>Target (90%)</span>
+                        <span>Perfect (100%)</span>
+                    </div>
+                </div>
+
+                <!-- Volume Input -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-slate-700 mb-3">Volume / Efficiency Tier</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="setVolume('low')" id="btn-low" class="vol-btn p-3 border rounded-lg text-left hover:bg-slate-50 transition-all border-slate-200">
+                            <div class="font-semibold text-slate-800">Low Volume</div>
+                            <div class="text-xs text-slate-500">Bottom 20% or <80% of avg</div>
+                        </button>
+                        <button onclick="setVolume('standard')" id="btn-standard" class="vol-btn p-3 border-2 border-indigo-600 bg-indigo-50 rounded-lg text-left hover:bg-indigo-50 transition-all">
+                            <div class="font-semibold text-indigo-900">Standard Volume</div>
+                            <div class="text-xs text-indigo-700">Meeting daily targets</div>
+                        </button>
+                        <button onclick="setVolume('high')" id="btn-high" class="vol-btn p-3 border rounded-lg text-left hover:bg-slate-50 transition-all border-slate-200">
+                            <div class="font-semibold text-slate-800">High Volume</div>
+                            <div class="text-xs text-slate-500">Top 20% of team</div>
+                        </button>
+                        <button onclick="setVolume('elite')" id="btn-elite" class="vol-btn p-3 border rounded-lg text-left hover:bg-slate-50 transition-all border-slate-200">
+                            <div class="font-semibold text-slate-800">Elite Volume</div>
+                            <div class="text-xs text-slate-500">Top 10% (Unicorn criteria)</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Culture/Peer Checkbox -->
+                <div class="mb-6">
+                    <label class="flex items-center space-x-3 cursor-pointer p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
+                        <input type="checkbox" id="cultureCheck" class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" checked>
+                        <div>
+                            <span class="text-sm font-medium text-slate-700">Positive Culture Rating</span>
+                            <p class="text-xs text-slate-500">No negative peer feedback or HR issues</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Bonus Chance Checkbox (Conditional) -->
+                <div id="bonusSection" class="hidden mb-6 bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fa-solid fa-star text-amber-500 mt-1 mr-3"></i>
+                        <div>
+                            <h3 class="text-sm font-bold text-amber-800">Redemption Eligibility</h3>
+                            <p class="text-xs text-amber-700 mb-2">QA is between 88-89.9%. Did the employee pass a blind "Bonus Case" review with 100%?</p>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="bonusCheck" class="w-4 h-4 text-amber-600 rounded focus:ring-amber-500">
+                                <span class="text-sm font-medium text-amber-900">Yes, bonus case was perfect.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Result Section -->
+            <div class="lg:col-span-1">
+                <div class="bg-indigo-900 text-white rounded-xl shadow-lg p-6 h-full flex flex-col justify-between relative overflow-hidden">
+                    <!-- The absolute decorations are removed for Notion compatibility -->
+
+                    <div class="relative z-10">
+                        <h3 class="text-indigo-200 text-sm font-semibold uppercase tracking-wider mb-1">Hawkvibes Score</h3>
+                        <div class="flex items-baseline">
+                            <span id="scoreDisplay" class="text-6xl font-bold">0</span>
+                            <span class="text-2xl text-indigo-300 font-light">/10</span>
+                        </div>
+                        
+                        <div id="badgeContainer" class="mt-4">
+                            <!-- Badges injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 mt-8 border-t border-indigo-700 pt-6">
+                        <h4 class="text-sm font-semibold text-indigo-300 mb-2">Calculation Logic</h4>
+                        <ul class="space-y-3 text-sm text-indigo-100" id="logicList">
+                            <!-- Logic steps injected by JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Unicorn Animation Container (now fixed for smaller display) -->
+                    <div id="unicornAnim" class="hidden absolute inset-0 bg-indigo-900 z-50 flex flex-col items-center justify-center text-center p-4">
+                        <i class="fa-solid fa-horse-head text-6xl text-pink-400 mb-4 animate-bounce"></i>
+                        <h2 class="text-3xl font-bold text-white mb-2">UNICORN STATUS!</h2>
+                        <p class="text-indigo-200">Perfect 10 Achieved</p>
+                        <button onclick="closeUnicorn()" class="mt-6 px-4 py-2 bg-white text-indigo-900 rounded-full text-sm font-bold hover:bg-indigo-100 transition">Awesome</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentVolume = 'standard';
+        
+        // DOM Elements
+        const qaInput = document.getElementById('qaInput');
+        const qaNumber = document.getElementById('qaNumber');
+        const cultureCheck = document.getElementById('cultureCheck');
+        const bonusSection = document.getElementById('bonusSection');
+        const bonusCheck = document.getElementById('bonusCheck');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const logicList = document.getElementById('logicList');
+        const badgeContainer = document.getElementById('badgeContainer');
+        const unicornAnim = document.getElementById('unicornAnim');
+
+        // Sync Slider & Number
+        qaInput.addEventListener('input', (e) => {
+            qaNumber.value = e.target.value;
+            calculate();
+        });
+        qaNumber.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if(val > 100) val = 100;
+            if(val < 0) val = 0;
+            qaInput.value = val;
+            calculate();
+        });
+
+        // Volume Buttons
+        function setVolume(vol) {
+            currentVolume = vol;
+            // Reset styles
+            document.querySelectorAll('.vol-btn').forEach(btn => {
+                btn.className = 'vol-btn p-3 border rounded-lg text-left hover:bg-slate-50 transition-all border-slate-200';
+                btn.querySelector('div:first-child').className = 'font-semibold text-slate-800';
+                btn.querySelector('div:last-child').className = 'text-xs text-slate-500';
+            });
+            // Set active style
+            const activeBtn = document.getElementById(`btn-${vol}`);
+            activeBtn.className = 'vol-btn p-3 border-2 border-indigo-600 bg-indigo-50 rounded-lg text-left hover:bg-indigo-50 transition-all';
+            activeBtn.querySelector('div:first-child').className = 'font-semibold text-indigo-900';
+            activeBtn.querySelector('div:last-child').className = 'text-xs text-indigo-700';
+
+            calculate();
+        }
+
+        // Other Listeners
+        cultureCheck.addEventListener('change', calculate);
+        bonusCheck.addEventListener('change', calculate);
+
+        // Core Calculation
+        function calculate() {
+            let qa = parseFloat(qaNumber.value);
+            const culture = cultureCheck.checked;
+            const volume = currentVolume; // low, standard, high, elite
+            let bonusApplied = false;
+
+            // Handle Bonus Chance Eligibility
+            // QA must be checked against the *original* input value, not the temporary 'qa' variable
+            const originalQa = parseFloat(qaNumber.value);
+
+            if (originalQa >= 88 && originalQa < 90 && volume !== 'low') {
+                bonusSection.classList.remove('hidden');
+                if (bonusCheck.checked) {
+                    // Simulating the bonus calculation: 
+                    // If bonus case is 100%, it effectively pushes them into the >90 bracket for scoring purposes
+                    // We treat it as if they crossed the threshold to 90
+                    qa = 90; 
+                    bonusApplied = true;
+                } else {
+                    // If eligible but didn't pass bonus, qa remains the original value
+                    qa = originalQa;
+                }
+            } else {
+                bonusSection.classList.add('hidden');
+                bonusCheck.checked = false; // Reset if criteria not met
+                qa = originalQa; // Ensure qa is always the input value if bonus is not relevant
+            }
+            
+            // Re-evaluate maxScore based on potentially adjusted QA value
+            let maxScore = 0;
+            let bracketName = "";
+            let score = 0;
+            let reasons = [];
+            let badgeColor = "bg-gray-500";
+            let badgeText = "Pending";
+
+            // 1. Determine Quality Gate (Max Potential)
+            if (qa < 80) {
+                maxScore = 4;
+                bracketName = "Critical Zone";
+                badgeColor = "bg-red-500";
+                badgeText = "Critical";
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-triangle-exclamation mt-1 mr-2 text-red-300"></i> QA < 80%: Cap is 4.</li>`);
+            } else if (qa < 90) {
+                maxScore = 6;
+                bracketName = "Below Expectation";
+                badgeColor = "bg-orange-500";
+                badgeText = "Below Exp.";
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-triangle-exclamation mt-1 mr-2 text-orange-300"></i> QA < 90%: Cap is 6.</li>`);
+            } else if (qa < 95) {
+                maxScore = 8;
+                bracketName = "Meets Expectation";
+                badgeColor = "bg-blue-500";
+                badgeText = "Meets Exp.";
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-check mt-1 mr-2 text-green-300"></i> QA 90-95%: Cap is 8.</li>`);
+            } else if (qa < 100) {
+                maxScore = 9;
+                bracketName = "Exceeds Expectation";
+                badgeColor = "bg-indigo-500";
+                badgeText = "Exceeds Exp.";
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-check-double mt-1 mr-2 text-green-300"></i> QA 95-99%: Cap is 9.</li>`);
+            } else {
+                maxScore = 10;
+                bracketName = "Unicorn Potential";
+                badgeColor = "bg-purple-500";
+                badgeText = "Unicorn Pot.";
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-crown mt-1 mr-2 text-yellow-300"></i> QA 100%: Cap is 10.</li>`);
+            }
+
+            // 2. Apply Volume & Culture Modifiers
+            score = maxScore; 
+
+            // Logic A: High Volume Logic
+            // "High volume with <90% QA is NOT rewarded"
+            if (qa < 90 && (volume === 'high' || volume === 'elite')) {
+                score = maxScore; // Stay at cap (4 or 6)
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-ban mt-1 mr-2 text-indigo-300"></i> High volume ignored due to low QA.</li>`);
+            } 
+            // Logic B: Low Volume Logic
+            else if (volume === 'low') {
+                score = Math.max(1, score - 2); // Drop by 2 points (approx)
+                reasons.push(`<li class="flex items-start"><i class="fa-solid fa-arrow-down mt-1 mr-2 text-red-300"></i> Low volume: -2 penalty.</li>`);
+            }
+            // Logic C: Standard Volume
+            else if (volume === 'standard') {
+                // If in higher brackets, Standard usually means you don't quite hit the absolute max of that bracket
+                if (maxScore === 8) score = 7.5; // range 7-8
+                if (maxScore === 9) score = 8.5; // range 8-9
+                if (maxScore === 10) score = 9; // 100% QA + Standard = 9 (Quality Floor Rule)
+                
+                if (maxScore === 10) {
+                    reasons.push(`<li class="flex items-start"><i class="fa-solid fa-shield-halved mt-1 mr-2 text-blue-300"></i> Quality Floor: 100% QA = Min 9.</li>`);
+                } else {
+                    reasons.push(`<li class="flex items-start"><i class="fa-regular fa-circle mt-1 mr-2 text-indigo-300"></i> Standard Volume: Solid score.</li>`);
+                }
+            }
+            // Logic D: High/Elite Volume with High QA
+            else if (qa >= 90) {
+                 // High volume pushes to top of bracket
+                 score = maxScore;
+                 reasons.push(`<li class="flex items-start"><i class="fa-solid fa-bolt mt-1 mr-2 text-yellow-300"></i> High Volume: Top of bracket.</li>`);
+            }
+
+            // 3. Special Case: The Unicorn 10
+            if (score === 10) {
+                // Must meet ALL criteria for a true 10
+                let finalScore = 10;
+                let isUnicorn = true;
+
+                if (volume !== 'elite') {
+                    finalScore = 9.5; // Downgrade slightly
+                    isUnicorn = false;
+                    reasons.push(`<li class="flex items-start"><i class="fa-solid fa-circle-info mt-1 mr-2 text-indigo-300"></i> Need top 10% Vol for 10.</li>`);
+                }
+                if (!culture) {
+                    finalScore = Math.min(finalScore, 9); // Penalty for culture, maximum is 9
+                    isUnicorn = false;
+                    reasons.push(`<li class="flex items-start"><i class="fa-solid fa-thumbs-down mt-1 mr-2 text-red-300"></i> Culture issue prevents 10. Max score 9.</li>`);
+                }
+
+                score = finalScore;
+                if (isUnicorn) {
+                    unicornAnim.classList.remove('hidden');
+                } else {
+                    unicornAnim.classList.add('hidden');
+                }
+            } else {
+                unicornAnim.classList.add('hidden');
+            }
+            
+            // Final check to ensure we don't exceed the max QA cap regardless of volume/bonus logic (e.g., if QA is 85%, score cannot be >6)
+            // This is primarily important for the bonus chance to ensure they don't jump too high.
+            if (originalQa < 80) score = Math.min(score, 4);
+            else if (originalQa < 90) score = Math.min(score, 6);
+            else if (originalQa < 95) score = Math.min(score, 8);
+            else if (originalQa < 100) score = Math.min(score, 9);
+
+
+            // 4. Bonus Text
+            if(bonusApplied) {
+                 reasons.push(`<li class="flex items-start"><i class="fa-solid fa-star mt-1 mr-2 text-amber-300"></i> Bonus Case unlocked higher tier!</li>`);
+            }
+
+            // Display Updates
+            scoreDisplay.innerText = score.toFixed(1); // Keep 1 decimal for consistency
+            logicList.innerHTML = reasons.join('');
+            
+            badgeContainer.innerHTML = `<span class="${badgeColor} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">${badgeText}</span>`;
+        }
+
+        function closeUnicorn() {
+            unicornAnim.classList.add('hidden');
+        }
+
+        // Init
+        calculate();
+
+    </script>
+</body>
+</html>
