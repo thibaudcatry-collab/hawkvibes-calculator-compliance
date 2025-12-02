@@ -124,7 +124,12 @@
                             <span class="text-2xl text-indigo-300 font-light">/10</span>
                         </div>
                         
-                        <div id="badgeContainer" class="mt-4">
+                        <!-- NEW: Separate Culture Rating Display -->
+                        <div id="cultureStatus" class="mt-2 p-2 rounded-lg text-sm font-semibold flex items-center">
+                            <!-- Culture status injected by JS -->
+                        </div>
+                        
+                        <div id="badgeContainer" class="mt-2">
                             <!-- Badges injected by JS -->
                         </div>
                     </div>
@@ -163,6 +168,7 @@
         const logicList = document.getElementById('logicList');
         const badgeContainer = document.getElementById('badgeContainer');
         const unicornAnim = document.getElementById('unicornAnim');
+        const cultureStatus = document.getElementById('cultureStatus'); // NEW
 
         // Sync Slider & Number
         qaInput.addEventListener('input', (e) => {
@@ -314,11 +320,7 @@
                     isUnicorn = false;
                     reasons.push(`<li class="flex items-start"><i class="fa-solid fa-circle-info mt-1 mr-2 text-indigo-300"></i> Need top 10% Vol for 10.</li>`);
                 }
-                if (!culture) {
-                    finalScore = Math.min(finalScore, 9); // Penalty for culture, maximum is 9
-                    isUnicorn = false;
-                    reasons.push(`<li class="flex items-start"><i class="fa-solid fa-thumbs-down mt-1 mr-2 text-red-300"></i> Culture issue prevents 10. Max score 9.</li>`);
-                }
+                // Culture check removed here to exclude it from the final Hawkvibes Score.
 
                 score = finalScore;
                 if (isUnicorn) {
@@ -342,6 +344,18 @@
             if(bonusApplied) {
                  reasons.push(`<li class="flex items-start"><i class="fa-solid fa-star mt-1 mr-2 text-amber-300"></i> Bonus Case unlocked higher tier!</li>`);
             }
+
+            // 5. Separate Culture Status Display (NEW LOGIC)
+            if (culture) {
+                cultureStatus.innerHTML = '<i class="fa-solid fa-thumbs-up text-green-400 mr-2"></i> Culture Rating: Positive';
+                cultureStatus.classList.remove('bg-red-900', 'text-white');
+                cultureStatus.classList.add('bg-indigo-700', 'text-indigo-100');
+            } else {
+                cultureStatus.innerHTML = '<i class="fa-solid fa-thumbs-down text-red-400 mr-2"></i> Culture Rating: Negative';
+                cultureStatus.classList.remove('bg-indigo-700', 'text-indigo-100');
+                cultureStatus.classList.add('bg-red-900', 'text-white');
+            }
+
 
             // Display Updates
             scoreDisplay.innerText = score.toFixed(1); // Keep 1 decimal for consistency
